@@ -1,0 +1,55 @@
+# ============================================
+# DOCKER IGNORE FILE
+# Files to exclude from Docker build context
+# ============================================
+
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Build output
+dist/
+build/
+
+# Environment files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env.production
+
+# Git
+.git/
+.gitignore
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Test & Coverage
+coverage/
+.nyc_output/
+
+# Documentation (optional - include if needed)
+*.md
+!README.md
+
+# Development files
+.eslintcache
+*.tsbuildinfo
+
+# Docker files (avoid recursion)
+Dockerfile*
+docker-compose*.yml
+.dockerignore

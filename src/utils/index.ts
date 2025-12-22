@@ -3,3 +3,6 @@
  */
 
 export * from './textUtils';
+export * from './calendarUtils';
+export * from './exportUtils';
+export * from './haptics';

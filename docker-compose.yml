@@ -1,0 +1,63 @@
+# ============================================
+# DOCKER COMPOSE FOR JULIR APPLICATION
+# Development and Production configurations
+# ============================================
+
+version: '3.8'
+
+services:
+  # Production build
+  julir:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        - VITE_APP_NAME=${VITE_APP_NAME:-Julir}
+        - VITE_APP_VERSION=${VITE_APP_VERSION:-2.0.0}
+        - VITE_APP_DESCRIPTION=${VITE_APP_DESCRIPTION:-Your voice companion for daily reflections}
+        - VITE_ENABLE_ANALYTICS=${VITE_ENABLE_ANALYTICS:-false}
+        - VITE_BASE_URL=${VITE_BASE_URL:-/}
+    container_name: julir-app
+    ports:
+      - "80:80"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    networks:
+      - julir-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.julir.rule=Host(`julir.example.com`)"
+      - "traefik.http.services.julir.loadbalancer.server.port=80"
+
+  # Development server (optional - use npm run dev instead)
+  julir-dev:
+    image: node:20-alpine
+    container_name: julir-dev
+    working_dir: /app
+    volumes:
+      - .:/app
+      - /app/node_modules
+    ports:
+      - "3000:3000"
+    command: sh -c "npm install && npm run dev -- --host 0.0.0.0"
+    environment:
+      - NODE_ENV=development
+      - VITE_APP_NAME=${VITE_APP_NAME:-Julir}
+      - VITE_APP_VERSION=${VITE_APP_VERSION:-2.0.0}
+    profiles:
+      - dev
+    networks:
+      - julir-network
+
+networks:
+  julir-network:
+    driver: bridge
+
+# Optional: Add volumes for persistent data
+# volumes:
+#   julir-data:

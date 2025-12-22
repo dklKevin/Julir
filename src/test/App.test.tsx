@@ -207,7 +207,7 @@ describe('JulirApp', () => {
 
     it('opens settings panel when clicking settings', async () => {
       const buttons = screen.getAllByRole('button');
-      const settingsButton = buttons[4];
+      const settingsButton = buttons[5]; // Index 5 after adding Insights button
 
       await userEvent.click(settingsButton);
 
@@ -227,9 +227,9 @@ describe('JulirApp', () => {
       render(<JulirApp />);
       await userEvent.click(screen.getByRole('button', { name: /skip for now/i }));
 
-      // Open settings
+      // Open settings (index 5 after adding Insights button)
       const buttons = screen.getAllByRole('button');
-      await userEvent.click(buttons[4]);
+      await userEvent.click(buttons[5]);
     });
 
     it('shows name input in settings', async () => {
@@ -270,7 +270,7 @@ describe('JulirApp', () => {
 
     it('opens character selection modal', async () => {
       const buttons = screen.getAllByRole('button');
-      await userEvent.click(buttons[3]); // Character select button
+      await userEvent.click(buttons[4]); // Character select button (index 4 after adding Insights)
 
       await waitFor(() => {
         expect(screen.getByText(/choose companion/i)).toBeInTheDocument();
@@ -279,7 +279,7 @@ describe('JulirApp', () => {
 
     it('shows all four characters', async () => {
       const buttons = screen.getAllByRole('button');
-      await userEvent.click(buttons[3]);
+      await userEvent.click(buttons[4]); // Character select (index 4 after adding Insights)
 
       await waitFor(() => {
         expect(screen.getAllByText('Julir').length).toBeGreaterThan(0);
@@ -291,7 +291,7 @@ describe('JulirApp', () => {
 
     it('shows character keywords', async () => {
       const buttons = screen.getAllByRole('button');
-      await userEvent.click(buttons[3]);
+      await userEvent.click(buttons[4]); // Character select (index 4 after adding Insights)
 
       await waitFor(() => {
         expect(screen.getByText('Steady')).toBeInTheDocument();
@@ -302,7 +302,7 @@ describe('JulirApp', () => {
 
     it('can select different character', async () => {
       const buttons = screen.getAllByRole('button');
-      await userEvent.click(buttons[3]);
+      await userEvent.click(buttons[4]); // Character select (index 4 after adding Insights)
 
       await waitFor(() => {
         expect(screen.getByText('Solomon')).toBeInTheDocument();
@@ -464,9 +464,18 @@ describe('JulirApp', () => {
         expect(screen.getByText('Test diary entry')).toBeInTheDocument();
       }, { timeout: 3000 });
 
-      // Click finish
+      // Click finish - should show style selector first
       await userEvent.click(screen.getByRole('button', { name: /finish/i }));
 
+      await waitFor(() => {
+        expect(screen.getByText(/choose your vibe/i)).toBeInTheDocument();
+      }, { timeout: 3000 });
+
+      // Select a style (click Reflective)
+      const reflectiveButton = screen.getByText('Reflective').closest('button');
+      if (reflectiveButton) await userEvent.click(reflectiveButton);
+
+      // Now should show diary entry modal
       await waitFor(() => {
         expect(screen.getByText(/your entry/i)).toBeInTheDocument();
       }, { timeout: 3000 });
@@ -479,8 +488,9 @@ describe('JulirApp', () => {
 
       await userEvent.click(screen.getByRole('button', { name: /finish/i }));
 
-      // Wait and verify no modal
+      // Wait and verify no style selector modal (since no user messages)
       await new Promise((r) => setTimeout(r, 500));
+      expect(screen.queryByText(/choose your vibe/i)).not.toBeInTheDocument();
       expect(screen.queryByText(/your entry/i)).not.toBeInTheDocument();
     });
   });
@@ -508,7 +518,16 @@ describe('JulirApp', () => {
         expect(screen.getByText('Test entry')).toBeInTheDocument();
       }, { timeout: 3000 });
 
+      // Click finish - shows style selector
       await userEvent.click(screen.getByRole('button', { name: /finish/i }));
+
+      await waitFor(() => {
+        expect(screen.getByText(/choose your vibe/i)).toBeInTheDocument();
+      }, { timeout: 3000 });
+
+      // Select a style
+      const reflectiveButton = screen.getByText('Reflective').closest('button');
+      if (reflectiveButton) await userEvent.click(reflectiveButton);
 
       await waitFor(() => {
         expect(screen.getByText(/your entry/i)).toBeInTheDocument();
@@ -534,9 +553,9 @@ describe('JulirApp', () => {
       render(<JulirApp />);
       await userEvent.click(screen.getByRole('button', { name: /skip for now/i }));
 
-      // Open character select and choose Solomon
+      // Open character select and choose Solomon (index 4 after adding Insights)
       const buttons = screen.getAllByRole('button');
-      await userEvent.click(buttons[3]);
+      await userEvent.click(buttons[4]);
 
       await waitFor(() => {
         expect(screen.getByText('Solomon')).toBeInTheDocument();

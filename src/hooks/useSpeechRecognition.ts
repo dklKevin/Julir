@@ -23,6 +23,8 @@ interface UseSpeechRecognitionReturn {
   isRecording: boolean;
   /** Current transcript */
   transcript: string;
+  /** Set transcript manually (for text input) */
+  setTranscript: (text: string) => void;
   /** Start recording */
   startListening: () => void;
   /** Stop recording */
@@ -57,9 +59,14 @@ export function useSpeechRecognition(
 
   // Check for browser support and initialize
   useEffect(() => {
+    // Web Speech API may be prefixed in some browsers
+    const windowWithSpeech = window as Window & {
+      SpeechRecognition?: typeof SpeechRecognition;
+      webkitSpeechRecognition?: typeof SpeechRecognition;
+    };
     const SpeechRecognitionAPI =
-      (window as any).SpeechRecognition ||
-      (window as any).webkitSpeechRecognition;
+      windowWithSpeech.SpeechRecognition ||
+      windowWithSpeech.webkitSpeechRecognition;
 
     if (!SpeechRecognitionAPI) {
       setIsSupported(false);
@@ -109,12 +116,14 @@ export function useSpeechRecognition(
     recognition.onend = () => {
       setIsRecording(false);
 
-      // Clear timers
+      // Clear timers and null refs to prevent memory leaks
       if (silenceTimerRef.current) {
         clearTimeout(silenceTimerRef.current);
+        silenceTimerRef.current = null;
       }
       if (maxDurationTimerRef.current) {
         clearTimeout(maxDurationTimerRef.current);
+        maxDurationTimerRef.current = null;
       }
 
       onEnd?.(transcriptRef.current);
@@ -123,15 +132,32 @@ export function useSpeechRecognition(
     recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
       console.error('Speech recognition error:', event.error);
       setIsRecording(false);
+
+      // Clear timers on error to prevent memory leaks
+      if (silenceTimerRef.current) {
+        clearTimeout(silenceTimerRef.current);
+        silenceTimerRef.current = null;
+      }
+      if (maxDurationTimerRef.current) {
+        clearTimeout(maxDurationTimerRef.current);
+        maxDurationTimerRef.current = null;
+      }
     };
 
     recognitionRef.current = recognition;
 
-    // Cleanup
+    // Cleanup on unmount or dependency change
     return () => {
-      if (silenceTimerRef.current) clearTimeout(silenceTimerRef.current);
-      if (maxDurationTimerRef.current) clearTimeout(maxDurationTimerRef.current);
+      if (silenceTimerRef.current) {
+        clearTimeout(silenceTimerRef.current);
+        silenceTimerRef.current = null;
+      }
+      if (maxDurationTimerRef.current) {
+        clearTimeout(maxDurationTimerRef.current);
+        maxDurationTimerRef.current = null;
+      }
       recognition.abort();
+      recognitionRef.current = null;
     };
   }, [silenceTimeout, maxDuration, onTranscript, onEnd]);
 
@@ -157,9 +183,15 @@ export function useSpeechRecognition(
     setTranscript('');
   }, []);
 
+  const setTranscriptManual = useCallback((text: string) => {
+    transcriptRef.current = text;
+    setTranscript(text);
+  }, []);
+
   return {
     isRecording,
     transcript,
+    setTranscript: setTranscriptManual,
     startListening,
     stopListening,
     resetTranscript,

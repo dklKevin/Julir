@@ -104,3 +104,44 @@ export const safeJsonParse = <T>(json: string, fallback: T): T => {
     return fallback;
   }
 };
+
+/** Maximum allowed name length */
+const MAX_NAME_LENGTH = 50;
+
+/**
+ * Sanitize and validate a user name.
+ * - Trims whitespace
+ * - Limits length to prevent UI issues
+ * - Removes potentially problematic characters
+ * @param name - Raw name input
+ * @returns Sanitized name
+ */
+export const sanitizeName = (name: string | null | undefined): string => {
+  if (!name) return '';
+
+  return name
+    .trim()
+    .substring(0, MAX_NAME_LENGTH)
+    .replace(/[<>{}[\]\\]/g, '') // Remove potentially problematic characters
+    .replace(/\s+/g, ' '); // Normalize whitespace
+};
+
+/**
+ * Get a safe display name with optional fallback.
+ * @param name - User's name
+ * @param fallback - Optional fallback if name is empty
+ * @returns Display-safe name or fallback
+ */
+export const getDisplayName = (name: string | null | undefined, fallback?: string): string => {
+  const sanitized = sanitizeName(name);
+  return sanitized || fallback || '';
+};
+
+/**
+ * Check if a name is valid (non-empty after sanitization).
+ * @param name - Name to check
+ * @returns True if name is valid
+ */
+export const isValidName = (name: string | null | undefined): boolean => {
+  return sanitizeName(name).length > 0;
+};

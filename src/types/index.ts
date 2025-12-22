@@ -15,6 +15,67 @@ export type Theme = 'light' | 'dark';
 /** Voice gender options for TTS */
 export type VoiceGender = 'FEMALE' | 'MALE';
 
+/** Summary style identifiers for diary generation */
+export type SummaryStyleId = 'reflective' | 'upbeat' | 'storyteller' | 'minimal';
+
+/** Mood identifiers for diary entries */
+export type MoodId =
+  | 'joyful'
+  | 'excited'
+  | 'grateful'
+  | 'peaceful'
+  | 'hopeful'
+  | 'loved'
+  | 'neutral'
+  | 'thoughtful'
+  | 'tired'
+  | 'anxious'
+  | 'frustrated'
+  | 'sad'
+  | 'stressed'
+  | 'lonely';
+
+/** Mood intensity levels */
+export type MoodIntensity = 'positive' | 'neutral' | 'challenging';
+
+/**
+ * Mood definition for diary entries
+ */
+export interface Mood {
+  /** Unique identifier */
+  id: MoodId;
+  /** Emoji representation */
+  emoji: string;
+  /** Display label */
+  label: string;
+  /** Short description */
+  description: string;
+  /** Color theme key */
+  color: string;
+  /** Emotional intensity category */
+  intensity: MoodIntensity;
+}
+
+/**
+ * Summary style definition for diary generation
+ */
+export interface SummaryStyle {
+  /** Unique identifier */
+  id: SummaryStyleId;
+  /** Display name */
+  name: string;
+  /** Emoji representation */
+  emoji: string;
+  /** Short description */
+  description: string;
+  /** Color theme key */
+  color: string;
+  /** Keywords describing the style */
+  keywords: string[];
+  /** The prompt template for diary generation */
+  prompt: string;
+}
+
 /**
  * Chat message structure
  */
@@ -41,10 +102,16 @@ export interface DiaryEntry {
   title: string;
   /** Full diary content */
   content: string;
-  /** Optional mood tag */
-  mood?: string;
+  /** Mood for this entry */
+  mood?: MoodId;
   /** Character used for this entry */
   characterId?: CharacterId;
+  /** Summary style used for generation */
+  summaryStyleId?: SummaryStyleId;
+  /** Whether entry is pinned/favorited */
+  isPinned?: boolean;
+  /** Tags for categorization */
+  tags?: string[];
 }
 
 /**

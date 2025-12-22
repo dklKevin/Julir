@@ -1,12 +1,111 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
   <head>
+    <!-- Basic Meta Tags -->
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Julir</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+
+    <!-- Primary Meta Tags -->
+    <title>Julir - Your Voice Companion for Daily Reflections</title>
+    <meta name="title" content="Julir - Your Voice Companion for Daily Reflections" />
+    <meta name="description" content="Julir is a modern voice-enabled AI diary companion that helps you reflect on your daily experiences through natural conversation. Speak your thoughts, and let Julir help you capture meaningful moments." />
+    <meta name="keywords" content="voice diary, AI companion, journal, diary app, speech recognition, text to speech, daily reflections, mindfulness, journaling, Gemini AI" />
+    <meta name="author" content="Julir Team" />
+    <meta name="robots" content="index, follow" />
+    <meta name="language" content="English" />
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://julir.app/" />
+    <meta property="og:title" content="Julir - Your Voice Companion for Daily Reflections" />
+    <meta property="og:description" content="A modern voice-enabled AI diary companion that helps you reflect on your daily experiences through natural conversation." />
+    <meta property="og:image" content="/og-image.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:site_name" content="Julir" />
+    <meta property="og:locale" content="en_US" />
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image" />
+    <meta property="twitter:url" content="https://julir.app/" />
+    <meta property="twitter:title" content="Julir - Your Voice Companion for Daily Reflections" />
+    <meta property="twitter:description" content="A modern voice-enabled AI diary companion that helps you reflect on your daily experiences through natural conversation." />
+    <meta property="twitter:image" content="/og-image.png" />
+
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#f472b6" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="Julir" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="application-name" content="Julir" />
+    <meta name="msapplication-TileColor" content="#f472b6" />
+    <meta name="msapplication-config" content="/browserconfig.xml" />
+
+    <!-- Favicon and Icons -->
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#f472b6" />
+
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="/manifest.json" />
+
+    <!-- Preconnect to External APIs -->
+    <link rel="preconnect" href="https://generativelanguage.googleapis.com" />
+    <link rel="preconnect" href="https://texttospeech.googleapis.com" />
+    <link rel="dns-prefetch" href="https://generativelanguage.googleapis.com" />
+    <link rel="dns-prefetch" href="https://texttospeech.googleapis.com" />
+
+    <!-- Canonical URL -->
+    <link rel="canonical" href="https://julir.app/" />
+
+    <!-- Structured Data (JSON-LD) -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "Julir",
+        "description": "A modern voice-enabled AI diary companion that helps you reflect on your daily experiences through natural conversation.",
+        "url": "https://julir.app",
+        "applicationCategory": "LifestyleApplication",
+        "operatingSystem": "Web Browser",
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "USD"
+        },
+        "featureList": [
+          "Voice input recognition",
+          "AI-powered conversations",
+          "Text-to-speech responses",
+          "Diary entry generation",
+          "Multiple AI personalities",
+          "Dark/Light theme support"
+        ],
+        "screenshot": "/screenshot.png",
+        "softwareVersion": "2.0.0"
+      }
+    </script>
+
+    <!-- Permissions Policy -->
+    <meta http-equiv="Permissions-Policy" content="microphone=(self), camera=(), geolocation=()" />
   </head>
   <body>
+    <!-- App Root -->
     <div id="root"></div>
+
+    <!-- No JavaScript Fallback -->
+    <noscript>
+      <div style="padding: 2rem; text-align: center; font-family: system-ui, sans-serif;">
+        <h1>JavaScript Required</h1>
+        <p>Julir requires JavaScript to run. Please enable JavaScript in your browser settings to use this application.</p>
+      </div>
+    </noscript>
+
+    <!-- Main Application Script -->
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

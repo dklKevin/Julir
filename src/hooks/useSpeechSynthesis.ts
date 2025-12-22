@@ -2,7 +2,7 @@
  * Custom hook for text-to-speech using Google Cloud TTS with browser fallback.
  */
 
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import type { VoiceConfig } from '../types';
 import { API_ENDPOINTS } from '../constants';
 import { prepareForSpeech } from '../utils/textUtils';
@@ -37,6 +37,34 @@ export function useSpeechSynthesis(
 
   const [isSpeaking, setIsSpeaking] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const audioUrlRef = useRef<string | null>(null);
+  const isMountedRef = useRef(true);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    isMountedRef.current = true;
+
+    return () => {
+      isMountedRef.current = false;
+
+      // Stop and cleanup audio
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.onended = null;
+        audioRef.current.onerror = null;
+        audioRef.current = null;
+      }
+
+      // Revoke any object URLs
+      if (audioUrlRef.current) {
+        URL.revokeObjectURL(audioUrlRef.current);
+        audioUrlRef.current = null;
+      }
+
+      // Cancel browser speech synthesis
+      window.speechSynthesis?.cancel();
+    };
+  }, []);
 
   /**
    * Stop current audio playback.
@@ -44,8 +72,17 @@ export function useSpeechSynthesis(
   const stop = useCallback(() => {
     if (audioRef.current) {
       audioRef.current.pause();
+      audioRef.current.onended = null;
+      audioRef.current.onerror = null;
       audioRef.current = null;
     }
+
+    // Revoke any object URLs
+    if (audioUrlRef.current) {
+      URL.revokeObjectURL(audioUrlRef.current);
+      audioUrlRef.current = null;
+    }
+
     window.speechSynthesis?.cancel();
     setIsSpeaking(false);
   }, []);
@@ -67,14 +104,18 @@ export function useSpeechSynthesis(
         utterance.rate = voiceConfig.speakingRate;
         utterance.pitch = 1 + voiceConfig.pitch / 10;
 
-        utterance.onstart = () => setIsSpeaking(true);
+        utterance.onstart = () => {
+          if (isMountedRef.current) setIsSpeaking(true);
+        };
         utterance.onend = () => {
-          setIsSpeaking(false);
-          onEnd?.();
+          if (isMountedRef.current) {
+            setIsSpeaking(false);
+            onEnd?.();
+          }
           resolve();
         };
         utterance.onerror = () => {
-          setIsSpeaking(false);
+          if (isMountedRef.current) setIsSpeaking(false);
           resolve();
         };
 
@@ -94,7 +135,7 @@ export function useSpeechSynthesis(
       }
 
       try {
-        setIsSpeaking(true);
+        if (isMountedRef.current) setIsSpeaking(true);
 
         const response = await fetch(`${API_ENDPOINTS.GOOGLE_TTS}?key=${apiKey}`, {
           method: 'POST',
@@ -114,6 +155,9 @@ export function useSpeechSynthesis(
           }),
         });
 
+        // Check if still mounted after async fetch
+        if (!isMountedRef.current) return;
+
         if (!response.ok) {
           console.error('TTS API error, falling back to browser TTS');
           return speakWithBrowserTTS(text);
@@ -128,30 +172,38 @@ export function useSpeechSynthesis(
           { type: 'audio/mp3' }
         );
         const audioUrl = URL.createObjectURL(audioBlob);
+        audioUrlRef.current = audioUrl; // Track for cleanup
+
         const audio = new Audio(audioUrl);
         audioRef.current = audio;
 
         return new Promise((resolve) => {
           audio.onended = () => {
-            setIsSpeaking(false);
+            if (isMountedRef.current) {
+              setIsSpeaking(false);
+              onEnd?.();
+            }
             URL.revokeObjectURL(audioUrl);
-            onEnd?.();
+            audioUrlRef.current = null;
             resolve();
           };
 
           audio.onerror = () => {
-            setIsSpeaking(false);
+            if (isMountedRef.current) setIsSpeaking(false);
             URL.revokeObjectURL(audioUrl);
+            audioUrlRef.current = null;
             speakWithBrowserTTS(text).then(resolve);
           };
 
           audio.play().catch(() => {
+            URL.revokeObjectURL(audioUrl);
+            audioUrlRef.current = null;
             speakWithBrowserTTS(text).then(resolve);
           });
         });
       } catch (error) {
         console.error('TTS error:', error);
-        setIsSpeaking(false);
+        if (isMountedRef.current) setIsSpeaking(false);
         return speakWithBrowserTTS(text);
       }
     },
