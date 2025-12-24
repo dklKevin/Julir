@@ -13,7 +13,7 @@ import {
   calculateMoodStats,
 } from '../constants';
 import { useLocalStorage, useSpeechRecognition, useSpeechSynthesis } from '../hooks';
-import { createGeminiService } from '../services';
+import { createGeminiService, initDatabase, migrateFromLocalStorage, initSecureStorage } from '../services';
 import {
   generateId,
   correctTranscript,
@@ -74,6 +74,9 @@ interface AppContextType {
   setGeminiApiKey: (key: string) => void;
   googleTtsApiKey: string;
   setGoogleTtsApiKey: (key: string) => void;
+  biometricLockEnabled: boolean;
+  setBiometricLockEnabled: (enabled: boolean) => void;
+  deleteAllData: () => void;
 
   // UI State
   showSettings: boolean;
@@ -147,6 +150,9 @@ interface AppContextType {
   saveEntry: () => void;
   deleteEntry: (id: string) => void;
   togglePinEntry: (id: string) => void;
+  toggleConcealEntry: (id: string) => void;
+  showConcealedEntries: boolean;
+  setShowConcealedEntries: (show: boolean) => void;
   updateEntryTags: (id: string, tags: string[]) => void;
   handleSaveProfile: (name: string) => void;
   allTags: string[];
@@ -198,6 +204,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [soundEnabled, setSoundEnabled] = useLocalStorage<boolean>('julir_sound', true);
   const [geminiApiKey, setGeminiApiKey] = useLocalStorage<string>('julir_gemini_key', '');
   const [googleTtsApiKey, setGoogleTtsApiKey] = useLocalStorage<string>('julir_tts_key', '');
+  const [biometricLockEnabled, setBiometricLockEnabled] = useLocalStorage<boolean>('julir_biometric_lock', false);
 
   // UI State
   const [showSettings, setShowSettings] = useState(false);
@@ -210,6 +217,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   // Search & Calendar State
   const [searchQuery, setSearchQuery] = useState('');
   const [historyViewMode, setHistoryViewMode] = useState<'list' | 'calendar'>('list');
+  const [showConcealedEntries, setShowConcealedEntries] = useState(false);
   const [calendarYear, setCalendarYear] = useState(new Date().getFullYear());
   const [calendarMonth, setCalendarMonth] = useState(new Date().getMonth());
   const [selectedCalendarDate, setSelectedCalendarDate] = useState<string | null>(null);
@@ -249,6 +257,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const filteredEntries = useMemo(() => {
     let filtered = savedEntries;
+
+    // Hide concealed entries unless explicitly showing them
+    if (!showConcealedEntries) {
+      filtered = filtered.filter((entry) => !entry.isConcealed);
+    }
+
     if (moodFilter !== 'all') {
       filtered = filtered.filter((entry) => entry.mood === moodFilter);
     }
@@ -262,7 +276,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       );
     }
     return filtered;
-  }, [savedEntries, searchQuery, moodFilter]);
+  }, [savedEntries, searchQuery, moodFilter, showConcealedEntries]);
 
   const entriesByDate = useMemo(() => groupEntriesByDate(savedEntries), [savedEntries]);
 
@@ -420,6 +434,29 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   // -------------------------------------------------------------------------
   // EFFECTS
   // -------------------------------------------------------------------------
+
+  // Initialize database and secure storage on mount
+  useEffect(() => {
+    async function init() {
+      try {
+        // Initialize secure storage (Keychain with iCloud sync)
+        await initSecureStorage();
+
+        // Initialize SQLite database
+        const success = await initDatabase();
+        if (success) {
+          // Check if we need to migrate from localStorage
+          const migrated = localStorage.getItem('julir_entries_migrated');
+          if (!migrated) {
+            await migrateFromLocalStorage();
+          }
+        }
+      } catch (error) {
+        console.error('Initialization failed:', error);
+      }
+    }
+    init();
+  }, []);
 
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 60000);
@@ -754,6 +791,17 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     [savedEntries, setSavedEntries]
   );
 
+  const toggleConcealEntry = useCallback(
+    (id: string) => {
+      setSavedEntries(
+        savedEntries.map((entry) =>
+          entry.id === id ? { ...entry, isConcealed: !entry.isConcealed } : entry
+        )
+      );
+    },
+    [savedEntries, setSavedEntries]
+  );
+
   const updateEntryTags = useCallback(
     (id: string, tags: string[]) => {
       setSavedEntries(
@@ -816,6 +864,55 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   );
 
   // -------------------------------------------------------------------------
+  // DATA MANAGEMENT
+  // -------------------------------------------------------------------------
+
+  /**
+   * Delete all user data from the app
+   * Required for App Store compliance
+   */
+  const deleteAllData = useCallback(() => {
+    // Clear all localStorage items
+    const julirKeys = Object.keys(localStorage).filter(key => key.startsWith('julir_'));
+    julirKeys.forEach(key => localStorage.removeItem(key));
+
+    // Reset all state to defaults
+    setSavedEntries([]);
+    setUserProfile({ name: '', createdAt: new Date(), lastActiveAt: new Date() });
+    setMessages([]);
+    setDiaryEntry(null);
+    setEditingId(null);
+    setDraftEntry(null);
+    setDraftMessages([]);
+    setHasStarted(false);
+    setSessionCompleted(false);
+    setShowSettings(false);
+    setShowHistory(false);
+    setShowProfileSetup(true);
+
+    // Reset settings to defaults
+    setSelectedCharacter('julir' as CharacterId);
+    setTheme('light');
+    setVoiceSpeed(1.0);
+    setSoundEnabled(true);
+    setGeminiApiKey('');
+    setGoogleTtsApiKey('');
+    setBiometricLockEnabled(false);
+  }, [
+    setSavedEntries,
+    setUserProfile,
+    setDraftEntry,
+    setDraftMessages,
+    setSelectedCharacter,
+    setTheme,
+    setVoiceSpeed,
+    setSoundEnabled,
+    setGeminiApiKey,
+    setGoogleTtsApiKey,
+    setBiometricLockEnabled,
+  ]);
+
+  // -------------------------------------------------------------------------
   // CONTEXT VALUE
   // -------------------------------------------------------------------------
 
@@ -860,6 +957,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setGeminiApiKey,
     googleTtsApiKey,
     setGoogleTtsApiKey,
+    biometricLockEnabled,
+    setBiometricLockEnabled,
+    deleteAllData,
 
     // UI State
     showSettings,
@@ -933,6 +1033,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     saveEntry,
     deleteEntry,
     togglePinEntry,
+    toggleConcealEntry,
+    showConcealedEntries,
+    setShowConcealedEntries,
     updateEntryTags,
     handleSaveProfile,
     allTags,

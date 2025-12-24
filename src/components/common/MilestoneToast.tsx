@@ -70,25 +70,31 @@ const MILESTONES: Record<string, Milestone> = {
 
 const STORAGE_KEY = 'julir-achieved-milestones';
 
+// Helper to get stored milestones - called only once at init
+function getInitialAchieved(): Set<string> {
+  if (typeof window === 'undefined') return new Set();
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (stored) {
+      return new Set(JSON.parse(stored));
+    }
+  } catch {
+    // Ignore parse errors
+  }
+  return new Set();
+}
+
 export function MilestoneToast() {
   const { savedEntries, currentStreak, isDark } = useApp();
   const [activeMilestone, setActiveMilestone] = useState<Milestone | null>(null);
-  const [achievedMilestones, setAchievedMilestones] = useState<Set<string>>(new Set());
+  // Initialize from localStorage once
+  const [achievedMilestones, setAchievedMilestones] = useState<Set<string>>(getInitialAchieved);
 
-  // Load achieved milestones from storage
+  // Check for new milestones when entries or streak changes
   useEffect(() => {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored) {
-      try {
-        setAchievedMilestones(new Set(JSON.parse(stored)));
-      } catch {
-        // Ignore parse errors
-      }
-    }
-  }, []);
+    // Don't show new milestones if one is already active
+    if (activeMilestone) return;
 
-  // Check for new milestones
-  useEffect(() => {
     const entryCount = savedEntries.length;
     const newMilestones: string[] = [];
 
@@ -118,18 +124,22 @@ export function MilestoneToast() {
     }
 
     // Show the first unachieved milestone
-    if (newMilestones.length > 0 && !activeMilestone) {
+    if (newMilestones.length > 0) {
       const milestoneId = newMilestones[0];
       const milestone = MILESTONES[milestoneId];
       if (milestone) {
-        haptic('success');
-        setActiveMilestone(milestone);
+        // Use timeout to avoid synchronous setState
+        const timer = setTimeout(() => {
+          haptic('success');
+          setActiveMilestone(milestone);
 
-        // Mark as achieved
-        const updated = new Set(achievedMilestones);
-        updated.add(milestoneId);
-        setAchievedMilestones(updated);
-        localStorage.setItem(STORAGE_KEY, JSON.stringify([...updated]));
+          // Mark as achieved
+          const updated = new Set(achievedMilestones);
+          updated.add(milestoneId);
+          setAchievedMilestones(updated);
+          localStorage.setItem(STORAGE_KEY, JSON.stringify([...updated]));
+        }, 0);
+        return () => clearTimeout(timer);
       }
     }
   }, [savedEntries.length, currentStreak, achievedMilestones, activeMilestone]);

@@ -5,3 +5,4 @@
 export { useLocalStorage, useLocalStorageString } from './useLocalStorage';
 export { useSpeechRecognition } from './useSpeechRecognition';
 export { useSpeechSynthesis } from './useSpeechSynthesis';
+export { useAppLock } from './useAppLock';

@@ -112,6 +112,8 @@ export interface DiaryEntry {
   isPinned?: boolean;
   /** Tags for categorization */
   tags?: string[];
+  /** Whether entry is hidden/concealed (requires biometric to view) */
+  isConcealed?: boolean;
 }
 
 /**

@@ -23,18 +23,20 @@ const CONTINUE_PROMPTS = [
 ];
 
 // Audio waveform bars component
+// Heights based on index for stable rendering
+const BAR_HEIGHTS = [10, 14, 12, 16, 11];
+
 function AudioWaveform({ isActive, color }: { isActive: boolean; color: string }) {
-  const barCount = 5;
   return (
     <div className="flex items-center justify-center gap-0.5 h-4" aria-hidden="true">
-      {Array.from({ length: barCount }).map((_, i) => (
+      {BAR_HEIGHTS.map((height, i) => (
         <div
           key={i}
           className={`w-1 rounded-full transition-all ${color} ${
             isActive ? 'voice-wave-bar' : 'h-1'
           }`}
           style={{
-            height: isActive ? `${8 + Math.random() * 8}px` : '4px',
+            height: isActive ? `${height}px` : '4px',
             animationDelay: `${i * 0.15}s`,
           }}
         />
@@ -107,6 +109,7 @@ export function ChatFooter() {
       className={`fixed bottom-0 left-0 right-0 z-20 p-4 border-t backdrop-blur-xl ${
         isDark ? 'bg-stone-950/90 border-stone-800' : 'bg-white/90 border-stone-200'
       }`}
+      style={{ paddingBottom: 'max(1rem, env(safe-area-inset-bottom))' }}
     >
       <div className="max-w-2xl lg:max-w-4xl xl:max-w-5xl mx-auto space-y-3">
         {/* Recording waveform indicator */}

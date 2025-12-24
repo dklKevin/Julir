@@ -10,3 +10,6 @@ export { ErrorBoundary } from './ErrorBoundary';
 export { SessionCompletedOverlay } from './SessionCompletedOverlay';
 export { OnboardingTooltip } from './OnboardingTooltip';
 export { MilestoneToast } from './MilestoneToast';
+export { LockScreen } from './LockScreen';
+export { PrivacyPolicy } from './PrivacyPolicy';
+export { DeleteDataModal } from './DeleteDataModal';

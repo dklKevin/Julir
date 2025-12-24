@@ -35,7 +35,7 @@ export function Header() {
   } = useApp();
 
   return (
-    <header className="relative z-10 p-4 sm:p-6">
+    <header className="relative z-10 p-4 sm:p-6" style={{ paddingTop: 'max(1rem, env(safe-area-inset-top))' }}>
       <div className="max-w-2xl lg:max-w-4xl xl:max-w-5xl mx-auto flex justify-between items-center">
         <div className="flex items-center gap-3">
           <div className={`p-3 rounded-2xl ${colors.accentBg} text-white shadow-lg`}>

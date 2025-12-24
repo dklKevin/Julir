@@ -20,14 +20,32 @@ import {
   SessionCompletedOverlay,
   OnboardingTooltip,
   MilestoneToast,
+  LockScreen,
 } from './components';
+import { useAppLock } from './hooks';
 
 // ============================================================================
 // APP CONTENT (uses context)
 // ============================================================================
 
 function AppContent() {
-  const { hasStarted, sessionCompleted, character, colors, isDark } = useApp();
+  const { hasStarted, sessionCompleted, character, colors, isDark, biometricLockEnabled } = useApp();
+
+  // App lock management
+  const { isLocked, unlock } = useAppLock({
+    enabled: biometricLockEnabled,
+  });
+
+  // Show lock screen when locked
+  if (isLocked) {
+    return (
+      <LockScreen
+        onUnlock={unlock}
+        characterEmoji={character.emoji}
+        characterName="Julir"
+      />
+    );
+  }
 
   return (
     <div

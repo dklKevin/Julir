@@ -1,5 +1,7 @@
 /**
- * Custom hook for text-to-speech using Google Cloud TTS with browser fallback.
+ * Custom hook for text-to-speech.
+ * Uses Google Cloud TTS API if key provided, falls back to browser's built-in Web Speech API.
+ * Browser Speech API works on iOS Safari WebView.
  */
 
 import { useState, useRef, useCallback, useEffect } from 'react';
@@ -29,6 +31,7 @@ interface UseSpeechSynthesisReturn {
 
 /**
  * Hook for managing text-to-speech.
+ * Uses Google Cloud TTS API if available, otherwise browser's Web Speech API.
  */
 export function useSpeechSynthesis(
   options: UseSpeechSynthesisOptions
@@ -223,6 +226,7 @@ export function useSpeechSynthesis(
       // Prepare text for speech (phonetic conversions, remove problematic chars)
       const speechText = prepareForSpeech(text);
 
+      // Use Google Cloud TTS if API key provided, otherwise browser TTS
       if (apiKey) {
         return speakWithGoogleTTS(speechText);
       } else {

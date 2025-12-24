@@ -3,7 +3,7 @@
  */
 
 // Common
-export { Header, WelcomeScreen, ExportMenu, BulkExportMenu, ErrorBoundary, SessionCompletedOverlay, OnboardingTooltip, MilestoneToast } from './common';
+export { Header, WelcomeScreen, ExportMenu, BulkExportMenu, ErrorBoundary, SessionCompletedOverlay, OnboardingTooltip, MilestoneToast, LockScreen } from './common';
 
 // Chat
 export { ChatArea, ChatFooter } from './chat';
