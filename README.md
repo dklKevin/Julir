@@ -1,73 +1,50 @@
-# React + TypeScript + Vite
+<p align="center">
+  <img src="public/logo.png" alt="Julir" width="200" />
+</p>
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+<h1 align="center">Julir</h1>
 
-Currently, two official plugins are available:
+<p align="center">
+  An AI voice diary for daily reflections and personal insights.
+</p>
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+<p align="center">
+  <img alt="platform" src="https://img.shields.io/badge/platform-Web%20%7C%20iOS-1c1917" />
+  <img alt="stack" src="https://img.shields.io/badge/React-19-61dafb" />
+  <img alt="typescript" src="https://img.shields.io/badge/TypeScript-5-3178c6" />
+  <img alt="license" src="https://img.shields.io/badge/license-MIT-green" />
+</p>
 
-## React Compiler
+---
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Demo
 
-## Expanding the ESLint configuration
+[![Watch the demo](https://img.shields.io/badge/▶%20Watch%20the%20demo-YouTube-red?style=for-the-badge)](https://youtube.com/shorts/UOgP1xRdTbw)
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## Overview
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+Julir is a voice-first journaling app. Talk to it like a diary, and it transcribes, replies, and quietly builds a picture of what's on your mind over time. The goal is a journaling habit that takes less effort than opening a notes app.
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+It runs in the browser and ships as a native iOS app from the same codebase via Capacitor.
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+## Features
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+- **Voice journaling** — speech-to-text entries with natural pauses handled for you
+- **AI reflections** — Gemini-powered responses that read the entry and reply thoughtfully, not generically
+- **Personal insights** — the app watches patterns across entries and surfaces what keeps coming up (moods, topics, recurring people)
+- **Local-first** — entries live in an on-device SQLite database. Nothing leaves the device except the text sent to Gemini
+- **Biometric lock** — Face ID / Touch ID on iOS
+- **Text-to-speech** — read entries back aloud
+- **PDF export** — save a month or a range as a portable file
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## Tech Stack
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+React 19 · TypeScript · Vite · Tailwind CSS · Capacitor (iOS) · Google Gemini · SQLite
+
+## Status
+
+Built as a solo project. The web build runs locally, and the iOS build is ready to install through Xcode. It is not on the App Store.
+
+## License
+
+[MIT](LICENSE) © Dongkyu Lee
