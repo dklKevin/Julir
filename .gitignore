@@ -91,6 +91,9 @@ service-account.json
 *.backup
 *.old
 
+# Local scratch workspace for the workflow-kevin repo (not part of Julir)
+workflow-kevin/
+
 # Lock files (optional - uncomment if you want to ignore)
 # package-lock.json
 # yarn.lock
