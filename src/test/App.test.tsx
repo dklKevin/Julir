@@ -212,7 +212,7 @@ describe('JulirApp', () => {
       await userEvent.click(settingsButton);
 
       await waitFor(() => {
-        expect(screen.getByText(/your name/i)).toBeInTheDocument();
+        expect(screen.getByLabelText('Your Name')).toBeInTheDocument();
         expect(screen.getByText(/gemini api key/i)).toBeInTheDocument();
       });
     });
@@ -234,7 +234,7 @@ describe('JulirApp', () => {
 
     it('shows name input in settings', async () => {
       await waitFor(() => {
-        expect(screen.getByText(/your name/i)).toBeInTheDocument();
+        expect(screen.getByLabelText('Your Name')).toBeInTheDocument();
       });
     });
 
