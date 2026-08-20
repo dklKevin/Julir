@@ -79,8 +79,9 @@ export function SessionCompletedOverlay() {
   }, [sessionCompleted]);
 
   // Animate confetti
+  const hasConfetti = confetti.length > 0;
   useEffect(() => {
-    if (confetti.length === 0) return;
+    if (!hasConfetti) return;
 
     const interval = setInterval(() => {
       setConfetti(prev =>
@@ -100,7 +101,7 @@ export function SessionCompletedOverlay() {
     }, 50);
 
     return () => clearInterval(interval);
-  }, [confetti.length > 0]);
+  }, [hasConfetti]);
 
   const handleStartNew = useCallback(() => {
     haptic('medium');
