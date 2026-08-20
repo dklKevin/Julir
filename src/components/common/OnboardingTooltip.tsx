@@ -53,33 +53,24 @@ export function OnboardingTooltip() {
   const { hasStarted, colors, isDark, savedEntries } = useApp();
   const [currentStep, setCurrentStep] = useState(0);
   const [isVisible, setIsVisible] = useState(false);
-  const [hasCompleted, setHasCompleted] = useState(false);
+  const [hasCompleted, setHasCompleted] = useState(
+    () => localStorage.getItem(STORAGE_KEY) === 'true'
+  );
 
-  // Check if onboarding was already completed
+  // Show onboarding after a short delay for first-time users with no entries
   useEffect(() => {
-    const completed = localStorage.getItem(STORAGE_KEY);
-    if (completed === 'true') {
-      setHasCompleted(true);
-    } else if (savedEntries.length === 0) {
-      // Only show for users with no entries
-      const timer = setTimeout(() => setIsVisible(true), 1500);
-      return () => clearTimeout(timer);
-    }
-  }, [savedEntries.length]);
+    if (hasCompleted || savedEntries.length > 0) return;
+    const timer = setTimeout(() => setIsVisible(true), 1500);
+    return () => clearTimeout(timer);
+  }, [savedEntries.length, hasCompleted]);
 
-  // Progress through steps based on user state
-  useEffect(() => {
-    if (hasCompleted) return;
-
-    if (hasStarted && currentStep === 0) {
-      setCurrentStep(1); // Move to voice tip when session starts
-    }
-  }, [hasStarted, currentStep, hasCompleted]);
+  // Advance to the voice tip when a session starts, without syncing state in an effect
+  const displayStep = hasStarted && currentStep === 0 && !hasCompleted ? 1 : currentStep;
 
   const handleNext = () => {
     haptic('light');
-    if (currentStep < ONBOARDING_STEPS.length - 1) {
-      setCurrentStep(currentStep + 1);
+    if (displayStep < ONBOARDING_STEPS.length - 1) {
+      setCurrentStep(displayStep + 1);
     } else {
       handleComplete();
     }
@@ -99,7 +90,7 @@ export function OnboardingTooltip() {
 
   if (!isVisible || hasCompleted) return null;
 
-  const step = ONBOARDING_STEPS[currentStep];
+  const step = ONBOARDING_STEPS[displayStep];
 
   return (
     <div className="fixed inset-0 z-50 pointer-events-none">
@@ -111,9 +102,9 @@ export function OnboardingTooltip() {
         className={`absolute pointer-events-auto max-w-xs p-4 rounded-2xl shadow-xl animate-pop ${
           isDark ? 'bg-stone-800 border border-stone-700' : 'bg-white border border-stone-200'
         } ${
-          currentStep === 0
+          displayStep === 0
             ? 'top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2'
-            : currentStep === 1 || currentStep === 2
+            : displayStep === 1 || displayStep === 2
             ? 'bottom-28 left-1/2 -translate-x-1/2'
             : 'top-20 right-4'
         }`}
@@ -151,9 +142,9 @@ export function OnboardingTooltip() {
               <div
                 key={i}
                 className={`w-1.5 h-1.5 rounded-full transition-all ${
-                  i === currentStep
+                  i === displayStep
                     ? colors.accentBg
-                    : i < currentStep
+                    : i < displayStep
                     ? `${colors.accentBg} opacity-50`
                     : isDark
                     ? 'bg-stone-600'
@@ -169,7 +160,7 @@ export function OnboardingTooltip() {
             onClick={handleNext}
             className={`px-4 py-1.5 rounded-lg text-sm font-medium transition tap-scale ${colors.accentBg} text-white hover:opacity-90`}
           >
-            {currentStep === ONBOARDING_STEPS.length - 1 ? 'Got it!' : 'Next'}
+            {displayStep === ONBOARDING_STEPS.length - 1 ? 'Got it!' : 'Next'}
           </button>
         </div>
       </div>

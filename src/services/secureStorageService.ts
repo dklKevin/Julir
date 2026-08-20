@@ -60,7 +60,7 @@ export async function getSecureValue(key: string): Promise<string | null> {
   try {
     const result = await SecureStorage.get(key, true); // sync = true
     return result ?? null;
-  } catch (error) {
+  } catch (_error) {
     // Key might not exist
     return null;
   }
