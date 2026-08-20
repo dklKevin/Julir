@@ -146,12 +146,12 @@ export default defineConfig(({ mode }) => {
           '**/*.stories.{ts,tsx}',
           '**/*.mock.{ts,tsx}',
         ],
-        // Thresholds match current measured coverage; raise as tests expand
+        // Thresholds - increase gradually as coverage improves
         thresholds: {
-          statements: 54,
+          statements: 60,
           branches: 50,
-          functions: 40,
-          lines: 54,
+          functions: 45,
+          lines: 60,
         },
         // Watermarks for color-coded output
         watermarks: {
