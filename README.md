@@ -27,6 +27,18 @@ Julir is a voice-first journaling app. Talk to it like a diary, and it transcrib
 
 It runs in the browser and ships as a native iOS app from the same codebase via Capacitor.
 
+## Quick start
+
+Local install, env, test, and production-build steps live in [DEPLOYMENT.md](DEPLOYMENT.md).
+
+```bash
+cp .env.example .env.local
+npm install
+npm run dev
+```
+
+The app is at `http://localhost:3000`. Add a Gemini API key in Settings (or leave it blank to use demo replies). See [DEPLOYMENT.md](DEPLOYMENT.md) for tests (`npm test`, `npm run test:coverage`) and production builds.
+
 ## Features
 
 - **Voice journaling** — speech-to-text entries with natural pauses handled for you
