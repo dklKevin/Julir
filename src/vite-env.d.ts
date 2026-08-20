@@ -3,6 +3,7 @@
 /**
  * Type definitions for Vite environment variables
  * All VITE_ prefixed variables are available in the app
+ * and are public. Do not add API keys here.
  */
 interface ImportMetaEnv {
   // Application Configuration
@@ -13,10 +14,6 @@ interface ImportMetaEnv {
   // API Endpoints
   readonly VITE_GEMINI_API_ENDPOINT: string;
   readonly VITE_GOOGLE_TTS_ENDPOINT: string;
-
-  // Optional: Pre-configured API Keys (for secure deployments)
-  readonly VITE_GEMINI_API_KEY?: string;
-  readonly VITE_GOOGLE_TTS_API_KEY?: string;
 
   // Feature Flags
   readonly VITE_ENABLE_ANALYTICS: string;
