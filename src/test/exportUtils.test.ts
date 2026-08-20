@@ -86,18 +86,25 @@ const untitledEntry: DiaryEntry = {
   content: '',
 };
 
+const downloadNames: string[] = [];
+const originalAnchorClick = HTMLAnchorElement.prototype.click;
+
 function lastDownloadFilename(): string {
-  const links = document.querySelectorAll('a');
-  return links[links.length - 1]?.download ?? '';
+  return downloadNames[downloadNames.length - 1] ?? '';
 }
 
 describe('exportUtils', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    downloadNames.length = 0;
     document.body.innerHTML = '';
+    HTMLAnchorElement.prototype.click = function click() {
+      downloadNames.push(this.download);
+    };
   });
 
   afterEach(() => {
+    HTMLAnchorElement.prototype.click = originalAnchorClick;
     document.body.innerHTML = '';
   });
 

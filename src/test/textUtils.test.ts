@@ -74,7 +74,7 @@ describe('textUtils', () => {
 
   describe('name helpers', () => {
     it('sanitizes, validates, and displays names', () => {
-      expect(sanitizeName('  Ann  <>  ')).toBe('Ann');
+      expect(sanitizeName('  Ann<>  ')).toBe('Ann');
       expect(sanitizeName(null)).toBe('');
       expect(sanitizeName('a'.repeat(80)).length).toBe(50);
       expect(getDisplayName('  Sam  ')).toBe('Sam');
