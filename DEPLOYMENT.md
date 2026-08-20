@@ -28,9 +28,12 @@ This document provides comprehensive instructions for deploying the Julir applic
 - **Docker** (optional): For containerized deployment
 - **Git**: For version control and CI/CD
 
-### Required API Keys
+### API Keys
 
-Julir requires the following API keys for full functionality:
+Julir can use the following user-provided API keys for full functionality. Enter
+them in the Settings panel; do not put them in `VITE_*` environment variables,
+because Vite publishes those values in the client bundle. The allowed public
+environment variables are listed in [`.env.example`](.env.example).
 
 1. **Google Gemini API Key**: For AI conversations
    - Get it from: [Google AI Studio](https://makersuite.google.com/app/apikey)
@@ -323,7 +326,7 @@ The project includes a GitHub Actions workflow (`.github/workflows/ci-cd.yml`) t
 3. **Build**: Creates production build
 4. **Docker**: Builds and pushes Docker image to GHCR
 5. **Deploy**: Deploys to GitHub Pages
-6. **Security**: Runs npm audit
+6. **Security**: Runs `npm audit --audit-level=high`; high-severity findings fail the job, and the build waits for this check to pass
 
 ### Required Secrets
 
@@ -332,16 +335,13 @@ Configure these in GitHub repository settings:
 | Secret | Description |
 |--------|-------------|
 | `GITHUB_TOKEN` | Automatic (for GHCR and Pages) |
-| `VERCEL_TOKEN` | (Optional) For Vercel deployment |
-| `VERCEL_ORG_ID` | (Optional) Vercel organization ID |
-| `VERCEL_PROJECT_ID` | (Optional) Vercel project ID |
 
 ### Branch Protection
 
 Recommended branch protection rules for `main`:
 
 - Require pull request reviews
-- Require status checks to pass (lint, test, build)
+- Require status checks to pass (lint, test, security, build)
 - Require branches to be up to date
 
 ---
@@ -350,7 +350,9 @@ Recommended branch protection rules for `main`:
 
 ### API Key Management
 
-**Important**: API keys should NEVER be committed to version control!
+**Important**: API keys should NEVER be committed to version control or passed
+to the public Vite build. Use the Settings panel for user-provided keys, or a
+server-side proxy for shared production keys.
 
 #### User-Provided Keys (Recommended)
 
@@ -440,7 +442,7 @@ docker build --no-cache -t julir-app .
 
 ### Environment Variables Not Working
 
-1. Ensure variables are prefixed with `VITE_`
+1. Ensure public client variables are prefixed with `VITE_`; never prefix API keys
 2. Restart the dev server after changes
 3. For production, rebuild the application
 
