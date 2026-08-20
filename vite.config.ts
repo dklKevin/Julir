@@ -3,10 +3,20 @@ import { defineConfig, loadEnv } from 'vite'
 import react from '@vitejs/plugin-react'
 import { resolve } from 'path'
 
+const CLIENT_BUNDLED_SECRET_KEYS = ['VITE_GEMINI_API_KEY', 'VITE_GOOGLE_TTS_API_KEY'] as const
+
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => {
   // Load env file based on `mode` in the current directory
   const env = loadEnv(mode, process.cwd(), '')
+
+  for (const key of CLIENT_BUNDLED_SECRET_KEYS) {
+    if (env[key]) {
+      throw new Error(
+        `${key} must not be set. Vite inlines every VITE_* value into the public JavaScript bundle. Users enter keys in Settings; a backend proxy should use unprefixed server env vars.`
+      )
+    }
+  }
 
   return {
     plugins: [react()],
@@ -17,16 +27,16 @@ export default defineConfig(({ mode }) => {
     // Development server configuration
     server: {
       port: 3000,
-      host: true,
+      host: 'localhost',
       strictPort: false,
       open: true,
-      cors: true,
+      cors: false,
     },
 
     // Preview server configuration
     preview: {
       port: 4173,
-      host: true,
+      host: 'localhost',
       strictPort: false,
     },
 
