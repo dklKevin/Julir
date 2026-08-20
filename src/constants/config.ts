@@ -4,6 +4,7 @@
  *
  * Environment variables are loaded from .env files via Vite.
  * All VITE_ prefixed env vars are available at build time.
+ * Never put API keys or other secrets in VITE_* variables.
  */
 
 import type { AppSettings, UserProfile } from '../types';
@@ -73,8 +74,10 @@ export const DEFAULT_SETTINGS: AppSettings = {
   selectedCharacter: DEFAULT_CHARACTER,
   theme: DEFAULT_THEME,
   soundEnabled: true,
-  geminiApiKey: getEnv('VITE_GEMINI_API_KEY', ''),
-  googleTtsApiKey: getEnv('VITE_GOOGLE_TTS_API_KEY', ''),
+  // Keys are entered in Settings and stored locally. Never read them from
+  // VITE_* — Vite inlines those values into the public JavaScript bundle.
+  geminiApiKey: '',
+  googleTtsApiKey: '',
 };
 
 /** Default user profile */
