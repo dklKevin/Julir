@@ -106,6 +106,9 @@
     "vite": "^7.2.6",
     "vitest": "^3.2.7"
   },
+  "overrides": {
+    "tinypool": "^2.1.2"
+  },
   "browserslist": {
     "production": [
       ">0.2%",
