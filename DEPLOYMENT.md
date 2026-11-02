@@ -113,6 +113,10 @@ npm run test:run
 
 # With coverage
 npm run test:coverage
+
+# Browser E2E tests (Playwright, iPhone 16 Pro viewport)
+npx playwright install chromium  # first run only
+npm run test:e2e
 ```
 
 ### Type Checking
@@ -323,10 +327,11 @@ The project includes a GitHub Actions workflow (`.github/workflows/ci-cd.yml`) t
 
 1. **Lint & Type Check**: Validates code quality
 2. **Test**: Runs the test suite with coverage
-3. **Build**: Creates production build
-4. **Docker**: Builds and pushes Docker image to GHCR
-5. **Deploy**: Deploys to GitHub Pages
-6. **Security**: Runs `npm audit --audit-level=high`; high-severity findings fail the job, and the build waits for this check to pass
+3. **E2E Tests**: Runs the Playwright browser tests in Chromium
+4. **Build**: Creates production build once test, E2E, and security pass
+5. **Docker**: Builds and pushes Docker image to GHCR
+6. **Deploy**: Deploys to GitHub Pages
+7. **Security**: Runs `npm audit --audit-level=high`; high-severity findings fail the job
 
 ### Required Secrets
 
@@ -341,7 +346,7 @@ Configure these in GitHub repository settings:
 Recommended branch protection rules for `main`:
 
 - Require pull request reviews
-- Require status checks to pass (lint, test, security, build)
+- Require status checks to pass (lint, test, e2e, security, build)
 - Require branches to be up to date
 
 ---
@@ -473,6 +478,7 @@ docker build --no-cache -t julir-app .
 | `npm test` | Run tests in watch mode |
 | `npm run test:run` | Run tests once |
 | `npm run test:coverage` | Run tests with coverage |
+| `npm run test:e2e` | Run Playwright browser tests |
 | `npm run lint` | Run ESLint |
 | `npm run typecheck` | Run TypeScript check |
 | `npm run docker:build` | Build Docker image |

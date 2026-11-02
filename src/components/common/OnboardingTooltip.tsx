@@ -50,19 +50,20 @@ const ONBOARDING_STEPS: TooltipStep[] = [
 const STORAGE_KEY = 'julir-onboarding-completed';
 
 export function OnboardingTooltip() {
-  const { hasStarted, colors, isDark, savedEntries } = useApp();
+  const { hasStarted, colors, isDark, savedEntries, showProfileSetup } = useApp();
   const [currentStep, setCurrentStep] = useState(0);
   const [isVisible, setIsVisible] = useState(false);
   const [hasCompleted, setHasCompleted] = useState(
     () => localStorage.getItem(STORAGE_KEY) === 'true'
   );
 
-  // Show onboarding after a short delay for first-time users with no entries
+  // Show onboarding after a short delay for first-time users with no entries,
+  // once the profile setup modal has been closed
   useEffect(() => {
-    if (hasCompleted || savedEntries.length > 0) return;
+    if (hasCompleted || showProfileSetup || savedEntries.length > 0) return;
     const timer = setTimeout(() => setIsVisible(true), 1500);
     return () => clearTimeout(timer);
-  }, [savedEntries.length, hasCompleted]);
+  }, [savedEntries.length, hasCompleted, showProfileSetup]);
 
   // Advance to the voice tip when a session starts, without syncing state in an effect
   const displayStep = hasStarted && currentStep === 0 && !hasCompleted ? 1 : currentStep;
@@ -88,7 +89,7 @@ export function OnboardingTooltip() {
     handleComplete();
   };
 
-  if (!isVisible || hasCompleted) return null;
+  if (!isVisible || hasCompleted || showProfileSetup) return null;
 
   const step = ONBOARDING_STEPS[displayStep];
 
@@ -97,11 +98,10 @@ export function OnboardingTooltip() {
       {/* Backdrop with spotlight effect */}
       <div className="absolute inset-0 bg-black/40 pointer-events-auto" onClick={handleDismiss} />
 
-      {/* Tooltip */}
+      {/* Tooltip: the wrapper positions, the card animates. The pop keyframes set
+          transform, which would otherwise replace the centring translate. */}
       <div
-        className={`absolute pointer-events-auto max-w-xs p-4 rounded-2xl shadow-xl animate-pop ${
-          isDark ? 'bg-stone-800 border border-stone-700' : 'bg-white border border-stone-200'
-        } ${
+        className={`absolute pointer-events-auto w-[calc(100%-2rem)] max-w-xs ${
           displayStep === 0
             ? 'top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2'
             : displayStep === 1 || displayStep === 2
@@ -109,59 +109,65 @@ export function OnboardingTooltip() {
             : 'top-20 right-4'
         }`}
       >
-        {/* Close button */}
-        <button
-          type="button"
-          onClick={handleDismiss}
-          className={`absolute top-2 right-2 p-1 rounded-full transition ${
-            isDark ? 'hover:bg-stone-700' : 'hover:bg-stone-100'
+        <div
+          className={`relative p-4 rounded-2xl shadow-xl animate-pop ${
+            isDark ? 'bg-stone-800 border border-stone-700' : 'bg-white border border-stone-200'
           }`}
-          aria-label="Close onboarding"
         >
-          <X size={14} />
-        </button>
-
-        {/* Content */}
-        <div className="flex items-start gap-3 pr-6">
-          <div className={`p-2 rounded-xl ${colors.accentBg} text-white shrink-0`}>
-            {step.icon}
-          </div>
-          <div>
-            <h3 className={`font-medium mb-1 ${colors.accent}`}>{step.title}</h3>
-            <p className={`text-sm ${isDark ? 'text-stone-400' : 'text-stone-500'}`}>
-              {step.description}
-            </p>
-          </div>
-        </div>
-
-        {/* Progress and actions */}
-        <div className="flex items-center justify-between mt-4">
-          {/* Progress dots */}
-          <div className="flex gap-1.5">
-            {ONBOARDING_STEPS.map((_, i) => (
-              <div
-                key={i}
-                className={`w-1.5 h-1.5 rounded-full transition-all ${
-                  i === displayStep
-                    ? colors.accentBg
-                    : i < displayStep
-                    ? `${colors.accentBg} opacity-50`
-                    : isDark
-                    ? 'bg-stone-600'
-                    : 'bg-stone-300'
-                }`}
-              />
-            ))}
-          </div>
-
-          {/* Next/Done button */}
+          {/* Close button */}
           <button
             type="button"
-            onClick={handleNext}
-            className={`px-4 py-1.5 rounded-lg text-sm font-medium transition tap-scale ${colors.accentBg} text-white hover:opacity-90`}
+            onClick={handleDismiss}
+            className={`absolute top-2 right-2 p-1 rounded-full transition ${
+              isDark ? 'hover:bg-stone-700' : 'hover:bg-stone-100'
+            }`}
+            aria-label="Close onboarding"
           >
-            {displayStep === ONBOARDING_STEPS.length - 1 ? 'Got it!' : 'Next'}
+            <X size={14} />
           </button>
+
+          {/* Content */}
+          <div className="flex items-start gap-3 pr-6">
+            <div className={`p-2 rounded-xl ${colors.accentBg} text-white shrink-0`}>
+              {step.icon}
+            </div>
+            <div>
+              <h3 className={`font-medium mb-1 ${colors.accent}`}>{step.title}</h3>
+              <p className={`text-sm ${isDark ? 'text-stone-400' : 'text-stone-500'}`}>
+                {step.description}
+              </p>
+            </div>
+          </div>
+
+          {/* Progress and actions */}
+          <div className="flex items-center justify-between mt-4">
+            {/* Progress dots */}
+            <div className="flex gap-1.5">
+              {ONBOARDING_STEPS.map((_, i) => (
+                <div
+                  key={i}
+                  className={`w-1.5 h-1.5 rounded-full transition-all ${
+                    i === displayStep
+                      ? colors.accentBg
+                      : i < displayStep
+                      ? `${colors.accentBg} opacity-50`
+                      : isDark
+                      ? 'bg-stone-600'
+                      : 'bg-stone-300'
+                  }`}
+                />
+              ))}
+            </div>
+
+            {/* Next/Done button */}
+            <button
+              type="button"
+              onClick={handleNext}
+              className={`px-4 py-1.5 rounded-lg text-sm font-medium transition tap-scale ${colors.accentBg} text-white hover:opacity-90`}
+            >
+              {displayStep === ONBOARDING_STEPS.length - 1 ? 'Got it!' : 'Next'}
+            </button>
+          </div>
         </div>
       </div>
     </div>
